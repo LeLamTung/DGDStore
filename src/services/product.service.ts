@@ -24,6 +24,7 @@ class ProductService {
     const product = new Product();
     console.log("test loi", req.body);
     product.ProductName = req.body.ProductName;
+    product.Stock = Number(req.body.Stock) || 0;
     const percent = Number(req.body.SalePercentage) || 0;
     const priceOriginal = Number(req.body.OriginalPrice) || 0;
     const discount = (percent * priceOriginal) / 100;
@@ -95,6 +96,7 @@ class ProductService {
       
       // Cập nhật dữ liệu
       product.ProductName = ProductName ?? product.ProductName;
+      product.Stock = Number(req.body.Stock) || product.Stock || 0;
       product.OriginalPrice = priceOriginal;
       product.SalePercentage = percent;
       product.Description = Description ?? product.Description;

@@ -33,6 +33,7 @@ class OrderService {
         order.TotalPrice = req.body.TotalPrice || order.TotalPrice;
         order.PaymentMethod = req.body.PaymentMethod || order.PaymentMethod;
         order.Status = req.body.Status || order.Status;
+        console.log("Before Save:", order);
         return await OrderRepository.save(order);
     }
     static async deleteOrder(idOrder: number) {

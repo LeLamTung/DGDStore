@@ -39,23 +39,35 @@ class CartController {
   }
   // Cập nhật số lượng sản phẩm trong giỏ hàng
   static async updateProductQuantity(req: Request, res: Response) {
-    try {
-      const { productId, quantity } = req.body;
+  try {
+    const { productId, quantity } = req.body;
 
-      // Cập nhật số lượng sản phẩm trong giỏ hàng
-      const cart = await CartService.updateProductQuantity(req, productId, quantity);
-
-      // Trả về giỏ hàng sau khi cập nhật
-      const data = {
-        message: "Product quantity updated",
-        data: cart,
-      };
-      res.json(data);
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: "Error updating product quantity" });
+    if (!productId || !quantity) {
+      return res.status(400).json({ message: "Thiếu productId hoặc quantity" });
     }
+
+    // Gọi service cập nhật giỏ hàng
+    const cart = await CartService.updateProductQuantity(req, productId, quantity);
+
+    res.json({
+      message: "Cập nhật số lượng sản phẩm thành công",
+      data: cart,
+    });
+
+  } catch (err: any) {
+    console.error(" Lỗi updateProductQuantity:", err);
+
+    // 🔥 Trả về đúng message từ service
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ message: err.message });
+    }
+
+    // Lỗi mặc định
+    res.status(500).json({
+      message: err.message || "Lỗi server khi cập nhật số lượng sản phẩm",
+    });
   }
+}
 
   // Xóa sản phẩm khỏi giỏ hàng
   static async removeProductFromCart(req: Request, res: Response) {

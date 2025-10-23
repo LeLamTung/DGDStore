@@ -8,7 +8,6 @@ import OrderApiController from "@controllers/api/order.api.controller";
 import upload from "@middlewares/upload.middleware";
 import { verifyToken } from "@middlewares/verifyToken";
 import { isAdmin } from "@middlewares/isAdmin";
-import { isAuthenticated } from "@middlewares/checkAuth";
 import ImagesApiController from "@controllers/api/images.controller";
 
 const router: Router = express.Router();
@@ -27,7 +26,6 @@ router.post('/auth/logout', (req: Request, res: Response) => {
 });
 
 //ROLE
-router.use(isAuthenticated);
 router.use(verifyToken);
 router.use(isAdmin);
 

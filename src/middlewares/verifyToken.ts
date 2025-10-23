@@ -18,9 +18,8 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
   // Lấy token từ cookie
   const token = req.cookies.token;
 
-  // Nếu không có token thì trả về lỗi 403
   if (!token) {
-    res.status(403).json({ message: "No token provided" });
+    res.status(401).json({ message: "Bạn chưa đăng nhập" });
     return;
   }
 
@@ -33,6 +32,6 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction): vo
     next();
   } catch (err) {
     // Token không hợp lệ
-    res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: "Token không hợp lệ hoặc đã hết hạn" });
   }
 };

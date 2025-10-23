@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, Table, ManyToMany, ManyToOne, O
 import Images from "./Images"
 import Categories from "./Categories"
 import OrderDetail from "./OrderDetail"
+import Cart from "./Cart"
 @Entity({ name: "products" })
 class Products {
     @PrimaryGeneratedColumn()
@@ -12,6 +13,9 @@ class Products {
 
     @Column()
     ImageName?: string
+
+    @Column()
+    Stock?: number
 
     @Column()
     OriginalPrice?: number
@@ -26,20 +30,23 @@ class Products {
     Description?: string;
 
     @Column({ type: 'boolean' })
-    IsSales?: number
+    IsSales?: boolean;
 
     @Column({ type: 'boolean' })
-    IsHome?: number
+    IsHome?: boolean;
 
     // moi quan hệ với image
-    @OneToMany(() => Images, (Images: Images) => Images.Product, { cascade: true, onDelete: "CASCADE" })
+    @OneToMany(() => Images, (Images: Images) => Images.Product, { cascade: true, onDelete: "SET NULL" })
     Images?: Images[];
     // moi quan he voi category 
-    @ManyToOne(() => Categories, (Category) => Category.Products, { cascade: true, onDelete: "CASCADE", eager: true })
+    @ManyToOne(() => Categories, (Category) => Category.Products, { cascade: true, onDelete: "SET NULL", eager: true })
     Category?: Categories;
 
     @OneToMany(() => OrderDetail, (orderDetail: OrderDetail) => orderDetail.Product)
     OrderDetails?: OrderDetail[];
+
+    @OneToMany(() => Cart, (Cart: Cart) => Cart.Products)
+    Cart?: Cart[];
 }
 
 export default Products;

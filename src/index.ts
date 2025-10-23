@@ -17,7 +17,7 @@ import routerClient from "@routes/Client.routes";
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 app.use(cors({
   origin: ["http://localhost:3000", "http://localhost:3001"], // Cho phép cả manager và client
   credentials: true,
@@ -41,16 +41,16 @@ app.set('view engine', 'ejs');
 app.set('views', './src/views');
 // parse cookies
 app.use(cookieParser());
-app.use(session({
-  secret: 'mykey', // ma hoa ID session
-  resave: false, // khong luu lai session neu khong thay doi
-  saveUninitialized: false, // luu lai session khi chua duoc khoi tao
-  cookie: {
-    secure: false, // true nếu dùng HTTPS
-    httpOnly: true,
-    sameSite: 'lax', // hoặc 'none' nếu cần
-  },
-}))
+// app.use(session({
+//   secret: 'mykey', // ma hoa ID session
+//   resave: false, // khong luu lai session neu khong thay doi
+//   saveUninitialized: false, // luu lai session khi chua duoc khoi tao
+//   cookie: {
+//     secure: false, // true nếu dùng HTTPS
+//     httpOnly: true,
+//     sameSite: 'lax', // hoặc 'none' nếu cần
+//   },
+// }))
 app.use((req, res,next) => {
   res.locals.session  = req.session;
   next();
@@ -69,4 +69,8 @@ app.use("/api/admin",ApiRouter)
 app.use("/api/client", routerClient)
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
+});
+app.use((req, res) => {
+  console.error("404 Not Found:", req.method, req.originalUrl);
+  res.status(404).json({ message: "Not Found" });
 });

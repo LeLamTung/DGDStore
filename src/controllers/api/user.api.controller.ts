@@ -133,63 +133,6 @@ class UserApiController {
             });
         }
     }
-    static async login(req: Request, res: Response) {
-        try {
-            const user: any = await UserService.getAccountbyEmailandPassword(req.body);
-    
-            if (!user) {
-                res.cookie("errorLogin", "Invalid Email or Password", {
-                    maxAge: 1000,
-                    httpOnly: true,
-                });
-                return res.redirect("/login");
-            }else if(user.email != req.body.email){
-                res.cookie("errorLogin", "Email không hợp lệ", {
-                    maxAge: 1000,
-                    httpOnly: true,
-                });
-                return res.redirect("/login");
-            }
-    
-            console.log("User before saving to session:", user);
-    
-            req.session.regenerate((err: any) => {
-                if (err) {
-                    console.error("Session regeneration error:", err);
-                    return res.status(500).json({ message: "Internal Server Error" });
-                }
-    
-                req.session.userIdLogin = user.idUser;
-                req.session.userLogin = user;
-    
-                req.session.save((err: any) => {
-                    if (err) {
-                        console.error("Session save error:", err);
-                        return res.status(500).json({ message: "Session save error" });
-                    }
-    
-    
-                    //  Tạo JWT
-                    const token = jwt.sign(
-                        {
-                            userId: user.idUser,
-                            email: user.email,
-                            role: user.role,
-                        },
-                        SECRET_KEY,
-                        { expiresIn: "1h" }
-                    );
-                    console.log(token)
-                    return res.json({ message: "Login successful", token });
-                    
-                });
-            });
-    
-        } catch (err) {
-            console.error("Login error:", err);
-            return res.status(500).json({ message: "Error logging in user" });
-        }
-    }
     
 }
 export default UserApiController;

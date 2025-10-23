@@ -1,44 +1,66 @@
-import { Entity, PrimaryGeneratedColumn, Column, Table, ManyToMany, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
-import OrderDetail from "./OrderDetail"
-import Users from "./Users"
-@Entity({name: "orders"})
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Table,
+  ManyToMany,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from "typeorm";
+import OrderDetail from "./OrderDetail";
+import Users from "./Users";
+@Entity({ name: "orders" })
 class Order {
-    @PrimaryGeneratedColumn()
-    idOrder?: number
+  @PrimaryGeneratedColumn()
+  idOrder?: number;
 
-    @Column()
-    CustomerName?: string
+  @Column()
+  MomoOrderId?: string;
 
-    @Column()
-    PhoneNumber?: string
+  @Column()
+  CustomerName?: string;
 
-    @Column()
-    Address?: string
+  @Column()
+  PhoneNumber?: string;
 
-    @Column()
-    Notes?: string
+  @Column()
+  Address?: string;
 
-    @Column("decimal")
-    TotalPrice?: number
+  @Column()
+  Notes?: string;
 
-    @Column()
-    PaymentMethod?: string
+  @Column("decimal")
+  TotalPrice?: number;
 
-    @Column()
-    Status?: number
+  @Column()
+  PaymentMethod?: string;
 
-    @CreateDateColumn()
-    CreatedAt?: Date
+  @Column()
+  Status?: number;
 
-    @UpdateDateColumn()
-    UpdateAt?: Date
+  @CreateDateColumn()
+  CreatedAt?: Date;
 
-    @OneToMany(() => OrderDetail,(OrderDetail:OrderDetail) => OrderDetail.Order, {
-        cascade: true,
-        onDelete: 'CASCADE', 
-      })
-    OrderDetail?: OrderDetail[]; 
+  @UpdateDateColumn()
+  UpdateAt?: Date;
 
+  @OneToMany(
+    () => OrderDetail,
+    (OrderDetail: OrderDetail) => OrderDetail.Order,
+    {
+      cascade: true,
+      onDelete: "CASCADE",
+    }
+  )
+  OrderDetail?: OrderDetail[];
+
+  @ManyToOne(() => Users, (Users) => Users.Order, {
+    onDelete: "CASCADE",
+    eager: true,
+  })
+  User?: Users;
 }
 
 export default Order;

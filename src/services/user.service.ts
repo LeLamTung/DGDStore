@@ -136,7 +136,7 @@ class UserService {
             where: { Email: Email },
             relations: ["Role"],
         });
-        console.log(user);
+        console.log('Day la user service',user);
 
         if (!user) return null; // Không tìm thấy user
 
