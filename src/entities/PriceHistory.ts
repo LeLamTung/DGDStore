@@ -1,25 +1,27 @@
 import {Entity,PrimaryGeneratedColumn,Column,CreateDateColumn,ManyToOne,JoinColumn} from "typeorm";
 import  Product  from "./Products"; 
+
 @Entity({name:"price_histories"})
 class PriceHistory {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "idpricehistory" })
   idPriceHistory?: number;
 
-  @Column("decimal", { precision: 15, scale: 2 }) // Dùng decimal cho tiền tệ để chính xác
+  @Column("decimal", { precision: 15, scale: 2, name: "originalprice" }) 
   OriginalPrice?: number;
 
-  @Column("decimal", { precision: 15, scale: 2 }) // Dùng decimal cho tiền tệ để chính xác
+  @Column("decimal", { precision: 15, scale: 2, name: "saleprice" }) 
   SalePrice?: number;
 
-  @Column({ type: "text", nullable: true })
-  Reason?: string; // Lý do thay đổi giá (VD: "AI Gợi ý", "Nhập hàng mới", "Sale")
+  @Column({ type: "text", nullable: true, name: "reason" })
+  Reason?: string; 
 
-  @CreateDateColumn()
-  ChangedAt?: Date; // Thời điểm giá thay đổi
+  @CreateDateColumn({ name: "changedat" })
+  ChangedAt?: Date; 
 
   @ManyToOne(() => Product, (product) => product.PriceHistories, {
-    onDelete: "CASCADE" // Nếu xóa sản phẩm -> Xóa luôn lịch sử của nó
+    onDelete: "CASCADE" 
   })
+  @JoinColumn({ name: "productidproduct" }) // Map khóa ngoại
   Product?: Product;
 }
 export default PriceHistory;

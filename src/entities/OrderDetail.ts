@@ -2,51 +2,50 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Table,
-  ManyToMany,
   ManyToOne,
-  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from "typeorm";
 import Order from "./Order";
 import Products from "./Products";
-@Entity({ name: "OrderDetail" })
+
+@Entity({ name: "orderdetail" }) // Sửa thành chữ thường cho chắc ăn
 class OrderDetail {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "idorderdetail" })
   idOrderDetail?: number;
 
-  @Column()
+  @Column({ name: "productname" })
   ProductName?: string;
 
-  @Column()
+  @Column({ name: "productimage" })
   ProductImage?: string;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column("decimal", { precision: 10, scale: 2, name: "price" })
   Price?: number;
 
-  @Column()
+  @Column({ name: "quantity" })
   Quantity?: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column("decimal", { precision: 10, scale: 2, name: "totalprice" })
   TotalPrice?: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "createdat" })
   CreatedAt?: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updatedat" })
   UpdatedAt?: Date;
 
-  //nhieu orderdetail mot order
   @ManyToOne(() => Order, (Order: Order) => Order.OrderDetail, {
     onDelete: "CASCADE",
   })
+  @JoinColumn({ name: "orderidorder" }) // Map khóa ngoại
   Order?: Order;
-  // mot orderdetail nhieu san pham
+  
   @ManyToOne(() => Products, (Products: Products) => Products.OrderDetails,{
     eager: true,
   })
+  @JoinColumn({ name: "productidproduct" }) // Map khóa ngoại
   Product?: Products;
 }
-
 export default OrderDetail;

@@ -2,41 +2,48 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Table,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   CreateDateColumn,
+  JoinColumn, // <-- Nhớ import thêm cái này
 } from "typeorm";
 import Role from "./Role";
 import Order from "./Order";
 import Cart from "./Cart";
+
 @Entity({ name: "users" })
 class Users {
-  @PrimaryGeneratedColumn()
+  // SỬA: iduser
+  @PrimaryGeneratedColumn({ name: "iduser" })
   idUser?: number;
 
-  @Column()
+  // SỬA: username
+  @Column({ name: "username" })
   UserName?: string;
 
-  @Column({
-    unique: true,
-  })
+  // SỬA: email
+  @Column({ unique: true, name: "email" })
   Email?: string;
 
-  @Column()
+  // SỬA: password
+  @Column({ name: "password" })
   Password?: string;
 
-  @Column({ type: "boolean", default: true })
+  // SỬA: isactive
+  @Column({ type: "boolean", default: true, name: "isactive" })
   IsActive?: boolean;
 
-  @Column({ nullable: true })
+  // SỬA: googleid
+  @Column({ nullable: true, name: "googleid" })
   GoogleId?: string;
 
-  @CreateDateColumn()
+  // SỬA: createdat
+  @CreateDateColumn({ name: "createdat" })
   CreatedAt?: Date;
 
   @ManyToOne(() => Role, (Role: Role) => Role.Users)
+  // SỬA QUAN TRỌNG: Chỉ định rõ tên cột khóa ngoại là roleidrole (chữ thường)
+  @JoinColumn({ name: "roleidrole" }) 
   Role?: Role;
 
   @OneToMany(() => Order, (Order: Order) => Order.User)

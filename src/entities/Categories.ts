@@ -1,18 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, Table, ManyToMany, ManyToOne, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm"
 import Products from "./Products"
+
 @Entity({name: "categories"})
 class Categories {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ name: "idcategory" })
     idCategory?: number
 
-    @Column()
+    @Column({ name: "categoryname" })
     CategoryName?: string
 
-    @Column()
+    @Column({ name: "categoryimage" })
     CategoryImage?: string
 
     @OneToMany(() => Products,(products:Products)=>products.Category)
     Products?: Products[];
 }
-
 export default Categories;

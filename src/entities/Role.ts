@@ -1,12 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, Table, OneToMany } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm"
 import User from "./Users";
 
-@Entity({ name: "roles" })
+@Entity({ name: "role" })
 class Role {
-    @PrimaryGeneratedColumn()
+    // SỬA: Map vào cột idrole chữ thường dưới DB
+    @PrimaryGeneratedColumn({ name: "idrole" }) 
     idRole?: number;
 
-    @Column()
+    // SỬA: Map vào cột namerole chữ thường
+    @Column({ name: "namerole" }) 
     NameRole?: string;
 
     @OneToMany(()=> User,(User:User)=> User.Role)

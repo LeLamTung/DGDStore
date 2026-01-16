@@ -2,54 +2,51 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  Table,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
+  JoinColumn,
 } from "typeorm";
 import OrderDetail from "./OrderDetail";
 import Users from "./Users";
+
 @Entity({ name: "orders" })
 class Order {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: "idorder" })
   idOrder?: number;
 
-  @Column()
+  @Column({ name: "momoorderid" })
   MomoOrderId?: string;
 
-  @Column()
+  @Column({ name: "customername" })
   CustomerName?: string;
 
-  @Column()
+  @Column({ name: "phonenumber" })
   PhoneNumber?: string;
 
-  @Column()
+  @Column({ name: "address" })
   Address?: string;
 
-  @Column()
+  @Column({ name: "notes" })
   Notes?: string;
 
-  @Column("decimal")
+  @Column("decimal", { name: "totalprice" })
   TotalPrice?: number;
 
-  @Column()
+  @Column({ name: "paymentmethod" })
   PaymentMethod?: string;
 
-  @Column()
+  @Column({ name: "status" })
   Status?: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: "createdat" })
   CreatedAt?: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: "updateat" })
   UpdateAt?: Date;
 
-  @OneToMany(
-    () => OrderDetail,
-    (OrderDetail: OrderDetail) => OrderDetail.Order,
-    {
+  @OneToMany(() => OrderDetail, (OrderDetail: OrderDetail) => OrderDetail.Order, {
       cascade: true,
       onDelete: "CASCADE",
     }
@@ -60,7 +57,7 @@ class Order {
     onDelete: "CASCADE",
     eager: true,
   })
+  @JoinColumn({ name: "useriduser" }) // Quan trọng
   User?: Users;
 }
-
 export default Order;

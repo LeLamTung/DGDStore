@@ -54,15 +54,16 @@ class UserService {
     }
     static async loginGoogle(data: { gg_token: string }) {
         const { gg_token } = data;
-
+        try{
         const ticket = await client.verifyIdToken({
             idToken: gg_token,
             audience: client_id,
         });
-
+        
         const payload = ticket.getPayload();
+        console.log("Google Payload:", payload);
         if (!payload || !payload.email || !payload.sub || !payload.name) {
-            throw new Error("Dữ liệu Google không hợp lệ");
+            throw new Error("Dữ liệu Google không hợp lệ hoặc thiếu thông tin");
         }
 
         const email = payload.email;
@@ -98,11 +99,14 @@ class UserService {
         newUser.Role = role;
         newUser.GoogleId = googleId;
 
-        user = await userRepository.save(newUser);
-        user.Role = role;
-
-        return user;
+        return  await userRepository.save(newUser);
+        
+    
+    } catch (error) {
+        console.error("Lỗi xác thực Google:", error);
+        throw new Error("Xác thực Google thất bại: Token không hợp lệ hoặc đã hết hạn.");
     }
+}
 
     static async deleteUser(id: any) {
         return await userRepository.delete(id);
