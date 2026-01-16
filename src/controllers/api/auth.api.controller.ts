@@ -6,13 +6,13 @@ import dotenv from "dotenv";
 import { AppDataSource } from "@databases/data-source";
 import { OAuth2Client } from "google-auth-library";
 import Role from "@entities/Roles";
-
 const roleRepository = AppDataSource.getRepository(Role);
 const userRepository = AppDataSource.getRepository(User);
 const client_id = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(client_id);
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY || "default_secret_key";
+const isProduction = process.env.NODE_ENV === 'production';
 
 class AuthApiController {
   static async getAllUsers(req: Request, res: Response) {
@@ -138,16 +138,18 @@ class AuthApiController {
       res.cookie("token", token, {
         httpOnly: true, // Đảm bảo cookie không thể truy cập từ JavaScript
         maxAge: 3600000, // Cookie hết hạn sau 1 giờ
-        sameSite: "lax", // Giúp bảo vệ chống lại CSRF
+        // Khi deploy Render bắt buộc phải có 2 dòng này cookie mới sống được
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
       });
-      const redirect =
-        user.Role?.NameRole === "Admin" 
-          ? "http://localhost:3000/app/dashboard/default"
-          : "http://localhost:3001";
+      const redirectUrl = user.Role?.NameRole === "Admin"
+        ? `http://localhost:3000/app/dashboard/default?token=${token}`
+        : `http://localhost:3001?token=${token}`;
 
       return res.json({
         message: "Login successful",
-        redirect,
+        redirect: redirectUrl, // Trả về URL để frontend tự redirect
+        accessToken: token,    // <--- QUAN TRỌNG: Trả token về cho Frontend
         user: {
           idUser: user.idUser,
           UserName: user.UserName,
@@ -187,11 +189,17 @@ class AuthApiController {
       res.cookie("token", token, {
         httpOnly: true,
         maxAge: 3600000,
-        sameSite: "lax",
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
       });
-
+      // SỬA: Thêm redirect URL và AccessToken vào response
+      const redirectUrl = user.Role?.NameRole === "Admin"
+        ? `http://localhost:3000/app/dashboard/default?token=${token}`
+        : `http://localhost:3001?token=${token}`;
       return res.json({
         message: "Google Login successful",
+        redirect: redirectUrl,
+        accessToken: token, // <--- BẮT BUỘC CÓ để Frontend lưu LocalStorage
         user: {
           idUser: user.idUser,
           Email: user.Email,
@@ -206,8 +214,12 @@ class AuthApiController {
   }
 
   static logout(req: any, res: Response) {
-    res.clearCookie("token"); // Xóa token trong cookie
-
+    // Xóa cookie phải khai báo y hệt lúc tạo mới xóa được
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? 'none' : 'lax',
+        });
     res.status(200).json({ message: "Logout successful" });
   }
 }
