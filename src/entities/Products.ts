@@ -25,7 +25,7 @@ class Products {
     @Column({ name: "saleprice" })
     SalePrice?: number
 
-    @Column({ name: "salepercentage" })
+    @Column("decimal", {precision: 5, scale: 2, name: "salepercentage" })
     SalePercentage?: number
 
     @Column({ type: 'text', nullable: true, name: "description" })

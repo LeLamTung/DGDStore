@@ -87,9 +87,7 @@ router.get('/product/list/:id', (req: Request, res: Response) => {
     ProductsApiController.getProductById(req, res);
 }),
 router.post('/product/create',upload.array("Images", 10), (req: Request, res:Response) =>{
-    console.log("test ben router",req.body);
     ProductsApiController.storeProducts(req, res);
-
 });
  router.put('/product/edit/:id',upload.array("Images", 10), (req: Request, res: Response) =>{
      ProductsApiController.updateProducts(req, res);
