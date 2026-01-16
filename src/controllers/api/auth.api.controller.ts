@@ -22,13 +22,13 @@ class AuthApiController {
         cod: 200,
         data: Users,
       };
-      res.json(data);
+      res.status(200).json(data);
     } catch (error) {
       const data = {
         cod: 500,
         message: "Server error",
       };
-      res.json(data);
+      res.status(500).json(data);
     }
   }
   static async getUserById(req: Request, res: Response) {
@@ -45,7 +45,7 @@ class AuthApiController {
         return res.status(404).json({ message: "User không tồn tại" });
       }
 
-      res.json({
+      res.status(200).json({
         cod: 200,
         message: "Lấy dữ liệu thành công",
         data: {

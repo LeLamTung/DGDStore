@@ -11,7 +11,6 @@ import {
 } from "typeorm";
 import Order from "./Order";
 import Products from "./Products";
-import ProductService from "@services/product.service";
 @Entity({ name: "OrderDetail" })
 class OrderDetail {
   @PrimaryGeneratedColumn()

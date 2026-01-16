@@ -3,6 +3,7 @@ import Images from "./Images"
 import Categories from "./Categories"
 import OrderDetail from "./OrderDetail"
 import Cart from "./Cart"
+import PriceHistory from "./PriceHistory"
 @Entity({ name: "products" })
 class Products {
     @PrimaryGeneratedColumn()
@@ -47,6 +48,9 @@ class Products {
 
     @OneToMany(() => Cart, (Cart: Cart) => Cart.Products)
     Cart?: Cart[];
+    
+    @OneToMany(() => PriceHistory, (priceHistory) => priceHistory.Product)
+    PriceHistories?: PriceHistory[];
 }
 
 export default Products;

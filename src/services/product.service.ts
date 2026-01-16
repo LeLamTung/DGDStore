@@ -2,8 +2,12 @@ import { AppDataSource } from "@databases/data-source";
 import { Request, Response } from "express";
 import Product from "@entities/Products";
 import Image from "@entities/Images";
+import PriceHistory from "@entities/PriceHistory";
+import upload, { getPublicIdFromUrl, cloudinary } from "../middlewares/upload.middleware";
+
 const ImageRepository = AppDataSource.getRepository(Image);
 const ProductRepository = AppDataSource.getRepository(Product);
+const PriceHistoryRepository = AppDataSource.getRepository(PriceHistory);
 
 class ProductService {
   static async getAllProducts(): Promise<Product[]> {
@@ -11,152 +15,258 @@ class ProductService {
     return data;
   }
 
-  static async getProductById(req: Request, res: Response) {
-    const id = parseInt(req.params.id);
+  static async getProductById(id: number) {
     const product = await ProductRepository.findOne({
       where: { idProduct: id },
-      relations: ["Category", "Images"],
+      relations: ["Category", "Images", "PriceHistories"],
+      order: {
+        PriceHistories: { ChangedAt: "DESC" }
+      }
     });
     return product;
   }
 
-  static async createProduct(req: Request, res: Response) {
-    const product = new Product();
-    console.log("test loi", req.body);
-    product.ProductName = req.body.ProductName;
-    product.Stock = Number(req.body.Stock) || 0;
-    const percent = Number(req.body.SalePercentage) || 0;
-    const priceOriginal = Number(req.body.OriginalPrice) || 0;
-    const discount = (percent * priceOriginal) / 100;
-    product.OriginalPrice = priceOriginal;
-    product.SalePercentage = req.body.SalePercentage;
-    if (!req.body.SalePrice) {
-      product.SalePrice = req.body.OriginalPrice - discount;
-    } else {
-      product.SalePrice = req.body.SalePrice;
-    }
-    product.Description = req.body.Description || "Chưa có mô tả";
-    product.IsSales = req.body.IsSales;
-    product.IsHome = req.body.IsHome;
-    product.Category = req.body.categoryIdCategory;
-
-    if (req.files != null && Array.isArray(req.files) && req.files.length > 0) {
-      const rDefault = Number(req.body.rDefault) || 0;
-      const uploadedFiles = req.files.map((file) => file.filename);
-
-      if (rDefault < 0 || rDefault >= uploadedFiles.length) {
-        return { error: "Chỉ số ảnh chính không hợp lệ!" };
-      }
-
-      // Lưu ảnh chính vào bảng Product
-      product.ImageName = uploadedFiles[rDefault];
-
-      const imagesToSave: Image[] = [];
-      req.files.forEach((file, index) => {
-        const image = new Image();
-        image.ImageLink = file.filename;
-        image.Product = product;
-        image.MainImage = index === rDefault;
-        imagesToSave.push(image);
-      });
-
-      try {
-        await ProductRepository.save(product);
-        await ImageRepository.save(imagesToSave);
-        return { product }; // Trả về dữ liệu sản phẩm
-      } catch (error) {
-        console.error("Error saving product or images:", error);
-        return { error: "Lưu sản phẩm thất bại" }; // Trả về lỗi
-      }
-    } else {
-      try {
-        await ProductRepository.save(product);
-        return { product }; // Trả về dữ liệu sản phẩm
-      } catch (error) {
-        return { error: "Lưu sản phẩm thất bại" }; // Trả về lỗi
-      }
-    }
-  }
-
-  static async updateProduct(data: any, req: Request, res: Response) {
+  static async createProduct(data: any, files: Express.Multer.File[]) {
     try {
-      const { idProduct, ProductName, OriginalPrice, SalePercentage, Description, IsSales, IsHome, Category, SalePrice, } = data;
-      const product = await ProductRepository.findOne({
-        where: { idProduct },
-        relations: ["Images"],
-      });
+      const product = new Product();
+      
+      product.ProductName = data.ProductName;
+      product.Stock = Number(data.Stock) || 0;
+      
+      // --- LOGIC TÍNH GIÁ MỚI ---
+      const priceOriginal = Number(data.OriginalPrice) || 0;
+      let finalSalePrice = 0;
+      let finalPercent = 0;
 
-      if (!product) {
-        return res.status(404).json({ message: "Sản phẩm không tồn tại!" });
+      if (data.SalePrice !== undefined && data.SalePrice !== "") {
+        finalSalePrice = Number(data.SalePrice);
+        if (priceOriginal > 0) {
+            finalPercent = ((priceOriginal - finalSalePrice) / priceOriginal) * 100;
+        } else {
+            finalPercent = 0;
+        }
+      } 
+      else if (data.SalePercentage !== undefined && data.SalePercentage !== "") {
+        finalPercent = Number(data.SalePercentage);
+        const discount = (finalPercent * priceOriginal) / 100;
+        finalSalePrice = priceOriginal - discount;
+      } 
+      else {
+        finalSalePrice = priceOriginal;
+        finalPercent = 0;
       }
 
-      const percent = Number(SalePercentage) || 0;
-      const priceOriginal = Number(OriginalPrice) || 0;
-      const discount = (percent * priceOriginal) / 100;
-      
-      // Cập nhật dữ liệu
-      product.ProductName = ProductName ?? product.ProductName;
-      product.Stock = Number(req.body.Stock) || product.Stock || 0;
+      // [CHECK RÀNG BUỘC]
+      if (finalSalePrice > priceOriginal) {
+        throw new Error("Giá khuyến mãi (SalePrice) không được lớn hơn giá gốc (OriginalPrice)!");
+      }
+      if (finalSalePrice < 0) {
+        throw new Error("Giá bán không được âm!");
+      }
+
       product.OriginalPrice = priceOriginal;
-      product.SalePercentage = percent;
-      product.Description = Description ?? product.Description;
-      product.IsHome = IsHome ?? product.IsHome;
-      product.IsSales = IsSales ?? product.IsSales;
-      product.Category = Category ?? product.Category;
-      
-      // Nếu OriginalPrice hoặc SalePercentage thay đổi, tính lại SalePrice
-      const newSalePrice = priceOriginal - discount;
-      if (SalePrice === undefined || SalePrice === product.SalePrice) {
-        product.SalePrice = newSalePrice;
+      product.SalePercentage = parseFloat(finalPercent.toFixed(2)); 
+      product.SalePrice = finalSalePrice;
+      // -------------------------------
+
+      product.Description = data.Description || "Chưa có mô tả";
+      product.IsSales = String(data.IsSales) === "true";
+      product.IsHome = String(data.IsHome) === "true";
+      product.Category = data.categoryIdCategory;
+
+      // 1. XỬ LÝ ẢNH ĐẠI DIỆN (ImageName) TRƯỚC KHI LƯU
+      // Đưa logic check file ra ngoài để lấy ImageName, chưa lưu vội
+      let rDefault = 0;
+      if (files && files.length > 0) {
+        rDefault = Number(data.rDefault) || 0;
+        if (rDefault < 0 || rDefault >= files.length) {
+          throw new Error("Chỉ số ảnh chính không hợp lệ!");
+        }
+        const mainFile = files[rDefault] ? files[rDefault] : files[0];
+        product.ImageName = mainFile.path;
       } else {
-        product.SalePrice = SalePrice;
+        product.ImageName = "";
       }
-      
+        
+      // 2. LƯU SẢN PHẨM (Logic chung cho cả 2 trường hợp có ảnh và không ảnh)
+      const savedProduct = await ProductRepository.save(product);
 
-      // Xử lý ảnh chính (ImageName)
-      const mainImage = req.body.mainImage; // mainImage từ frontend
+      // 3. LƯU LỊCH SỬ GIÁ (BẮT BUỘC CHẠY)
+      // Đã đưa ra ngoài if-else để đảm bảo luôn chạy
+      const newPriceHistory = new PriceHistory();
+      newPriceHistory.Product = savedProduct;
+      newPriceHistory.OriginalPrice = savedProduct.OriginalPrice;
+      newPriceHistory.SalePrice = savedProduct.SalePrice;
+      newPriceHistory.Reason = "Khởi tạo sản phẩm";
+      const savedphistory = await PriceHistoryRepository.save(newPriceHistory);
 
-      if (mainImage) {
-        // Cập nhật tên ảnh chính
-        product.ImageName = mainImage; // Giả sử mainImage là tên của file ảnh
+      // 4. LƯU CÁC ẢNH VÀO BẢNG IMAGE (Nếu có file upload)
+      let imagesToSave: Image[] = [];
+      if (files && files.length > 0) {
+        imagesToSave = files.map((file, index) => {
+          const image = new Image();
+          image.ImageLink = file.path;
+          image.Product = savedProduct;
+          image.MainImage = index === rDefault;
+          return image;
+        });
+        await ImageRepository.save(imagesToSave);
       }
-      await ProductRepository.save(product);
 
-      return res.status(200).json({
-        message: "Cập nhật sản phẩm thành công!",
-        data: product,
-      });
+      // Trả về kết quả
+      return { 
+          product: savedProduct, 
+          images: imagesToSave, 
+          pricehistory: savedphistory 
+      };
+
     } catch (error) {
-      console.error("Lỗi cập nhật sản phẩm:", error);
-      return res.status(500).json({
-        message: "Cập nhật sản phẩm thất bại",
-        error,
-      });
+      console.error("Lỗi service createProduct:", error);
+      throw error;
     }
   }
 
-  static async deleteProduct(req: Request, res: Response) {
-    const id = parseInt(req.params.id);
+  static async updateProduct(id: number, data: any, files: Express.Multer.File[]) {
     const product = await ProductRepository.findOne({
       where: { idProduct: id },
-      relations: ["Images"],
-    }); // relation để hiển thị ra tất cả các mối quan hệ của sản phẩmẩm
-    if (!product) {
-      return res.status(404).json({ message: "Sản phẩm không tồn tại" });
+      relations: ["Category", "Images", "PriceHistories"],
+    });
+
+    if (!product) return null;
+
+    const oldSalePrice = Number(product.SalePrice);
+
+    // 1. UPDATE THÔNG TIN CƠ BẢN
+    if (data.ProductName) product.ProductName = data.ProductName;
+    if (data.Stock) product.Stock = Number(data.Stock);
+    if (data.Description) product.Description = data.Description;
+    
+    if (data.IsHome !== undefined) product.IsHome = String(data.IsHome) === "true";
+    if (data.IsSales !== undefined) product.IsSales = String(data.IsSales) === "true";
+    if (data.categoryIdCategory) product.Category = data.categoryIdCategory;
+
+    // --- LOGIC TÍNH GIÁ MỚI CHO UPDATE ---
+    const newOriginalPrice = data.OriginalPrice !== undefined && data.OriginalPrice !== "" 
+        ? Number(data.OriginalPrice) 
+        : Number(product.OriginalPrice);
+    
+    let newSalePriceResult = 0;
+    let newPercentResult = 0;
+
+    if (data.SalePrice !== undefined && data.SalePrice !== "") {
+        newSalePriceResult = Number(data.SalePrice);
+        if (newOriginalPrice > 0) {
+             newPercentResult = ((newOriginalPrice - newSalePriceResult) / newOriginalPrice) * 100;
+        } else {
+             newPercentResult = 0;
+        }
     }
-    // vì là có quan hệ với "Image" và "category" nên không thể xóa được ("sẽ hiện thị là không thể xóa được vì idProduct còn liên quan đến ảnh và Category")
+    else if (data.SalePercentage !== undefined && data.SalePercentage !== "") {
+        newPercentResult = Number(data.SalePercentage);
+        const discount = (newPercentResult * newOriginalPrice) / 100;
+        newSalePriceResult = newOriginalPrice - discount;
+    }
+    else {
+        if (data.OriginalPrice !== undefined && data.OriginalPrice !== "") {
+            newSalePriceResult = newOriginalPrice;
+            newPercentResult = 0;
+        } else {
+            newSalePriceResult = Number(product.SalePrice);
+            newPercentResult = Number(product.SalePercentage);
+        }
+    }
+
+    // [CHECK RÀNG BUỘC]
+    if (newSalePriceResult > newOriginalPrice) {
+        throw new Error("Giá khuyến mãi không được lớn hơn giá gốc!");
+    }
+    if (newSalePriceResult < 0) {
+        throw new Error("Giá bán không được âm!");
+    }
+
+    product.OriginalPrice = newOriginalPrice;
+    product.SalePercentage = parseFloat(newPercentResult.toFixed(2));
+    product.SalePrice = newSalePriceResult;
+
+    // 2. XỬ LÝ ẢNH MỚI
+    if (files && files.length > 0) {
+      const newImages = files.map(file => {
+        const image = new Image();
+        image.ImageLink = file.path;
+        image.Product = product;
+        image.MainImage = false;
+        return image;
+      });
+      await ImageRepository.save(newImages);
+    }
+
+    // 3. XỬ LÝ ĐỔI ẢNH ĐẠI DIỆN
+    if (data.ImageName) {
+      product.ImageName = data.ImageName;
+    } else if (files && files.length > 0) {
+      product.ImageName = files[0].path;
+    }
+
+    const savedProduct = await ProductRepository.save(product);
+
+    // 4. LƯU LỊCH SỬ GIÁ
+    if (oldSalePrice !== Number(savedProduct.SalePrice)) {
+        const newPriceHistory = new PriceHistory();
+        newPriceHistory.Product = savedProduct;
+        newPriceHistory.OriginalPrice = savedProduct.OriginalPrice;
+        newPriceHistory.SalePrice = savedProduct.SalePrice;
+        newPriceHistory.Reason = data.Reason || `Cập nhật giá: ${oldSalePrice} -> ${savedProduct.SalePrice}`;
+        await PriceHistoryRepository.save(newPriceHistory);
+    }
+
+    return await ProductRepository.findOne({
+      where: { idProduct: id },
+      relations: ["Category", "Images", "PriceHistories"],
+      order: { PriceHistories: { ChangedAt: "DESC" }}
+    });
+  }
+
+  static async deleteProduct(id: number) {
+    const product = await ProductRepository.findOne({
+      where: { idProduct: id },
+      relations: ["Category", "Images"],
+    });
+
+    if (!product) return null;
+
+    const imagesToDelete: string[] = [];
+    if (product.ImageName) imagesToDelete.push(product.ImageName);
+    if (product.Images && product.Images.length > 0) {
+      product.Images.forEach(img => {
+        if (img.ImageLink) imagesToDelete.push(img.ImageLink)
+      });
+    }
+
+    if (imagesToDelete.length > 0) {
+      try {
+        const deletePromises = imagesToDelete.map(url => {
+          const publicId = getPublicIdFromUrl(url);
+          if (publicId) return cloudinary.uploader.destroy(publicId);
+        });
+        await Promise.all(deletePromises);
+      } catch (err) {
+        console.error("Lỗi xóa ảnh trên Cloud:", err);
+      }
+    }
 
     if (product.Images && product.Images.length > 0) {
-      // vì vậy nên cần phải xóa ảnh trước để "Product" không còn liên quan tới ảnh khác, ở đây là bảng "Image"
       await ImageRepository.remove(product.Images);
     }
-    // sau khi đã xóa được ảnh thì "Product" sẽ không liên quan đến bảng nào nữa nên có thể xóa được.
-    try {
-      await ProductRepository.remove(product);
-    } catch (error) {
-      console.error("Error deleting product:", error);
-    }
-    return product;
+    
+    return await ProductRepository.remove(product);
+  }
+  static async getPriceHistoryByProductId(productId: number) {
+    const history = await PriceHistoryRepository.find({
+      where: { Product: { idProduct: productId } },
+      order: { ChangedAt: "ASC" }, // Sắp xếp cũ -> mới để vẽ biểu đồ
+      select: ["idPriceHistory", "OriginalPrice", "SalePrice", "Reason", "ChangedAt"]
+    });
+    return history;
   }
 }
 

@@ -9,43 +9,56 @@ class CategoriesApiController {
                 "cod": 200,
                 "data": Categories,
             }
-            res.json(data);
+            res.status(200).json(data);
         }
         catch (error) {
             const data = {
                 "cod": 500,
                 "message": "Server error",
             }
-            res.json(data);
+            res.status(500).json(data);
         }
     }
     static async getCategoryById(req: Request, res: Response) {
         try {
-            const Categories: Categories[] = await CategoriesService.getCategoryById(req);
+            const id= parseInt(req.params.id);
+            if (isNaN(id)) {
+                return res.status(400).json({message: "ID không hợp lệ"});
+            }
+            const Category = await CategoriesService.getCategoryById(id);
+            // Thêm check 404 nếu không tìm thấy
+            if (!Category) {
+                return res.status(404).json({
+                    "cod": 404,
+                    "message": "Không tìm thấy danh mục",
+                });
+            }
             const data = {
                 "cod": 200,
-                "data": Categories,
+                "data": Category,
             }
-            res.json(data);
+            res.status(200).json(data);
         }
         catch (error) {
             const data = {
                 "cod": 500,
                 "message": "Server error",
             }
-            res.json(data);
+            res.status(500).json(data);
         }
     }
     static async storeCategories(req: Request, res: Response) {
         try {
-            const Categories = await CategoriesService.createCategories(req, res);
-            res.json({
+            const data = req.body;
+            const files = req.files as Express.Multer.File[];
+            const Categories = await CategoriesService.createCategories(data, files);
+            res.status(201).json({
                 "cod": 200,
                 "message": "Thêm mới thành công",
                 "data": Categories,
             });
         } catch (error) {
-            res.json({
+            res.status(500).json({
                 "cod": 500,
                 "message": "Server error",
             });
@@ -54,14 +67,20 @@ class CategoriesApiController {
     
     static async updateCategories(req: Request, res: Response) {
         try {
-            const Categories = await CategoriesService.updateCategories( req, res);
-            res.json({
+            const data = req.body;
+            const files = req.files as Express.Multer.File[];
+            const id = parseInt(req.params.id)
+            if (isNaN(id)) {
+                return res.status(400).json({ message: "ID không hợp lệ" });
+            }
+            const Categories = await CategoriesService.updateCategories(id,data, files);
+            res.status(200).json({
                 "cod": 200,
                 "message": "Cập nhật thành công",
                 "data": Categories,
             });
         } catch (error) {
-            res.json({
+            res.status(500).json({
                 "cod": 500,
                 "message": "Server error",
             });
@@ -72,7 +91,10 @@ class CategoriesApiController {
     
     static async deleteCategories(req: Request, res: Response) {
         try {
-            const id = parseInt(req.params.id, 10);    
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                return res.status(400).json({message:" ID không hợp lệ" });
+            } 
             const Categories = await CategoriesService.deleteCategories(id);
     
             // Nếu không tìm thấy Categories để xóa

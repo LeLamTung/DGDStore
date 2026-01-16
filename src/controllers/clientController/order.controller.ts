@@ -21,7 +21,7 @@ class OrderController {
 
       if (PaymentMethod === "0") {
         // 👉 Thanh toán COD
-        const order = await OrderService.createOrder(req);
+        const order = await OrderService.createOrder(userId,req.body);
         return res.status(201).json({
           message: "Đặt hàng thành công (COD)",
           data: order,

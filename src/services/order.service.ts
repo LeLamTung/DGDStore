@@ -21,19 +21,18 @@ class OrderService {
         return data;
     }
 
-    static async updateOrder(req:Request,res:Response): Promise<Order> {
-        const id = req.body.idOrder;
+    static async updateOrder(id: number, data: any): Promise<Order | null> {
         const order = await OrderRepository.findOneBy({idOrder: id});
-        if (!order) throw new Error("Không tìm thấy đơn hàng");
+        if (!order) return null; // Trả null để controller xử lý 404
 
-        order.CustomerName = req.body.CustomerName || order.CustomerName;
-        order.PhoneNumber = req.body.PhoneNumber || order.PhoneNumber;
-        order.Address = req.body.Address || order.Address;
-        order.Notes = req.body.Notes || order.Notes;
-        order.TotalPrice = req.body.TotalPrice || order.TotalPrice;
-        order.PaymentMethod = req.body.PaymentMethod || order.PaymentMethod;
-        order.Status = req.body.Status || order.Status;
-        console.log("Before Save:", order);
+        order.CustomerName = data.CustomerName || order.CustomerName;
+        order.PhoneNumber = data.PhoneNumber || order.PhoneNumber;
+        order.Address = data.Address || order.Address;
+        order.Notes = data.Notes || order.Notes;
+        order.TotalPrice = data.TotalPrice || order.TotalPrice;
+        order.PaymentMethod = data.PaymentMethod || order.PaymentMethod;
+        order.Status = data.Status || order.Status;
+        
         return await OrderRepository.save(order);
     }
     static async deleteOrder(idOrder: number) {

@@ -21,7 +21,11 @@ class ProductsClientController {
     }
     static async getProductById(req: Request, res: Response) {
         try {
-            const Products = await ClientProductsService.getProductById(req,res);
+            const id = parseInt(req.params.id);
+            if (isNaN(id)) {
+                return res.status(400).json({ message: "ID không hợp lệ" });
+            }
+            const Products = await ClientProductsService.getProductById(id);
             const data = {
                 "cod": 200,
                 "data": Products,

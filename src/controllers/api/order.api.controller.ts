@@ -28,17 +28,23 @@ class OrderController {
             res.status(500).json({ message: "Error fetching order" });
         }
     }
-    static async updateOrder(req: Request, res: Response){
+   static async updateOrder(req: Request, res: Response){
         try {
-            const order = await OrderService.updateOrder(req, res);
-            res.json({
+            const id = req.body.idOrder; // Hoặc parseInt(req.params.id) tùy route
+            if(!id) return res.status(400).json({ message: "Thiếu ID đơn hàng" });
+
+            const order = await OrderService.updateOrder(id, req.body);
+
+            if(!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+
+            return res.status(200).json({
                 "cod": 200,
                 "message": "Cập nhật thành công",
                 "data": order,
             });
         } catch (err) {
             console.log(err);
-            res.status(500).json({ message: "Error updating order" });
+            return res.status(500).json({ message: "Error updating order" });
         }
     }
     static async deleteOrder(req: Request, res: Response){

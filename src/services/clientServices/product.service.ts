@@ -10,8 +10,7 @@ class ClientProductService {
     const data: any = await ProductRepository.find();
     return data;
   }
-  static async getProductById(req: Request, res: Response) {
-      const id = parseInt(req.params.id);
+  static async getProductById(id: number) {
       const product = await ProductRepository.findOne({
         where: { idProduct: id },
         relations: ["Category", "Images"],

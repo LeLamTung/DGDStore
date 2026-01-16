@@ -1,3 +1,4 @@
+import AiService  from '@services/ai.service';
 import express, { Express, NextFunction, Request, Response, Router } from "express";
 import RoleApiController from "@controllers/api/role.api.controller";
 import CategoriesApiController from "@controllers/api/category.api.controller";
@@ -90,11 +91,17 @@ router.post('/product/create',upload.array("Images", 10), (req: Request, res:Res
     ProductsApiController.storeProducts(req, res);
 
 });
- router.put('/product/edit',upload.array("Images", 10), (req: Request, res: Response) =>{
+ router.put('/product/edit/:id',upload.array("Images", 10), (req: Request, res: Response) =>{
      ProductsApiController.updateProducts(req, res);
  });
 router.delete('/product/delete/:id', (req: Request, res:Response) => {
     ProductsApiController.deleteProducts(req,res);
+});
+router.post('/product/suggest-price', (req: Request, res: Response) => {
+    ProductsApiController.suggestPrice(req, res);
+});
+router.get('/product/price-history/:id', (req: Request, res: Response) => {
+    ProductsApiController.getPriceHistory(req, res);
 });
 //Images
 router.get('/images/list', (req: Request, res:Response) => {

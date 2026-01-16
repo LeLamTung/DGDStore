@@ -6,5 +6,8 @@ build/
 dist/
 
 *.log
-
+src/views/
 uploads/
+firebase-key.json
+src/scripts/
+.expo
