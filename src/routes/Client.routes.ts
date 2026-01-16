@@ -8,7 +8,7 @@ import ProductsClientController from "@controllers/clientController/product.cont
 import CategoriesClientController from "@controllers/clientController/category.controller";
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
-import { isAuthenticated } from "@middlewares/checkAuth";
+// import { isAuthenticated } from "@middlewares/checkAuth";
 import { verifyToken } from "@middlewares/verifyToken";
 const axios = require("axios");
 const app: Express = express();
