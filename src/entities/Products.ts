@@ -3,7 +3,7 @@ import Images from "./Images"
 import Categories from "./Categories"
 import OrderDetail from "./OrderDetail"
 import Cart from "./Cart"
-import PriceHistory from "./PriceHistory"
+import PriceHistory from "./PriceHistories"
 
 @Entity({ name: "products" })
 class Products {

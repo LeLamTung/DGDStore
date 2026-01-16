@@ -1,4 +1,4 @@
-import Role from "@entities/Role";
+import Role from "@entities/Roles";
 import RoleService from "@services/role.service";
 import { Request, Response } from "express";
 class RoleApiController {

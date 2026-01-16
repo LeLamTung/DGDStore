@@ -1,5 +1,5 @@
 import User from "@entities/Users";
-import Role from "@entities/Role";
+import Role from "@entities/Roles";
 import bcrypt from "bcrypt";
 import { AppDataSource } from "@databases/data-source";
 import { OAuth2Client } from 'google-auth-library';

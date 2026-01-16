@@ -7,8 +7,8 @@ import {
   CreateDateColumn,
   JoinColumn, // <-- Nhớ import thêm cái này
 } from "typeorm";
-import Role from "./Role";
-import Order from "./Order";
+import Role from "./Roles";
+import Order from "./Orders";
 import Cart from "./Cart";
 
 @Entity({ name: "users" })

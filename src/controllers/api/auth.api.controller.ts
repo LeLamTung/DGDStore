@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { AppDataSource } from "@databases/data-source";
 import { OAuth2Client } from "google-auth-library";
-import Role from "@entities/Role";
+import Role from "@entities/Roles";
 
 const roleRepository = AppDataSource.getRepository(Role);
 const userRepository = AppDataSource.getRepository(User);

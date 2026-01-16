@@ -1,6 +1,6 @@
 import { AppDataSource } from "@databases/data-source";
 import { Request, Response } from "express";
-import Order from "@entities/Order";
+import Order from "@entities/Orders";
 import OrderDetail from "@entities/OrderDetail";
 import Products from "@entities/Products"; // Giả sử bạn có model Product
 

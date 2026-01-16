@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from "typeorm";
-import Order from "./Order";
+import Order from "./Orders";
 import Products from "./Products";
 
 @Entity({ name: "orderdetail" }) // Sửa thành chữ thường cho chắc ăn

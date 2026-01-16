@@ -1,5 +1,5 @@
 import { AppDataSource } from "@databases/data-source";
-import Order from "@entities/Order";
+import Order from "@entities/Orders";
 import OrderDetail from "@entities/OrderDetail";
 import Products from "@entities/Products";
 import Cart from "@entities/Cart";

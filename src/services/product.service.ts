@@ -2,7 +2,7 @@ import { AppDataSource } from "@databases/data-source";
 import { Request, Response } from "express";
 import Product from "@entities/Products";
 import Image from "@entities/Images";
-import PriceHistory from "@entities/PriceHistory";
+import PriceHistory from "@entities/PriceHistories";
 import upload, { getPublicIdFromUrl, cloudinary } from "../middlewares/upload.middleware";
 
 const ImageRepository = AppDataSource.getRepository(Image);
