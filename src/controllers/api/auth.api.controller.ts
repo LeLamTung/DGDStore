@@ -11,6 +11,7 @@ const userRepository = AppDataSource.getRepository(User);
 const client_id = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(client_id);
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const CLIENT_FRONTEND_URL = process.env.CLIENT_FRONTEND_URL || "http://localhost:3001";
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY || "default_secret_key";
 const isProduction = process.env.NODE_ENV === 'production';
@@ -145,7 +146,7 @@ class AuthApiController {
       });
       const redirectUrl = user.Role?.NameRole === "Admin"
         ? `${FRONTEND_URL}/app/dashboard/default?token=${token}`
-        : `${FRONTEND_URL}token=${token}`;
+        : `${CLIENT_FRONTEND_URL}token=${token}`;
 
       return res.json({
         message: "Login successful",
@@ -196,7 +197,7 @@ class AuthApiController {
       // SỬA: Thêm redirect URL và AccessToken vào response
       const redirectUrl = user.Role?.NameRole === "Admin"
         ? `${FRONTEND_URL}/app/dashboard/default?token=${token}`
-        : `${FRONTEND_URL}token=${token}`;
+        : `${CLIENT_FRONTEND_URL}token=${token}`;
       return res.json({
         message: "Google Login successful",
         redirect: redirectUrl,
