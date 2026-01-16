@@ -61,8 +61,8 @@ app.get("/", (req: Request, res: Response) => {
 });
 AppDataSource.initialize().then(() => {
   console.log('initialized db')
-}).catch(() => {
-  console.error('Error while connecting to the database')
+}).catch((err) => {
+  console.error('Error while connecting to the database',err)
   process.exit(1)  // exit with error code 1 to indicate failure to connect to the database
 });
 app.use("/api/admin",ApiRouter)
