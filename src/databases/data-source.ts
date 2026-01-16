@@ -15,7 +15,11 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   dropSchema: false,
   logging: [ "error"],
-  entities: ["src/entities/**.ts"],
-  migrations: ["src/migrations/**/*.ts"], // 👈 thêm dòng này
+  entities: isProduction 
+        ? ["dist/entities/*.js"] // Khi lên Render: Dùng file .js trong folder dist
+        : ["src/entities/*.ts"], // Khi ở Local: Dùng file .ts trong folder src
+  migrations: isProduction 
+        ? ["dist/migrations/**/*.js"]
+        : ["src/migrations/**/*.ts"], 
   migrationsRun: false,
 });
