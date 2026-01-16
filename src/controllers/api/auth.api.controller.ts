@@ -10,6 +10,7 @@ const roleRepository = AppDataSource.getRepository(Role);
 const userRepository = AppDataSource.getRepository(User);
 const client_id = process.env.GOOGLE_CLIENT_ID;
 const client = new OAuth2Client(client_id);
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY || "default_secret_key";
 const isProduction = process.env.NODE_ENV === 'production';
@@ -143,8 +144,8 @@ class AuthApiController {
         sameSite: isProduction ? 'none' : 'lax',
       });
       const redirectUrl = user.Role?.NameRole === "Admin"
-        ? `http://localhost:3000/app/dashboard/default?token=${token}`
-        : `http://localhost:3001?token=${token}`;
+        ? `${FRONTEND_URL}/app/dashboard/default?token=${token}`
+        : `${FRONTEND_URL}token=${token}`;
 
       return res.json({
         message: "Login successful",
@@ -194,8 +195,8 @@ class AuthApiController {
       });
       // SỬA: Thêm redirect URL và AccessToken vào response
       const redirectUrl = user.Role?.NameRole === "Admin"
-        ? `http://localhost:3000/app/dashboard/default?token=${token}`
-        : `http://localhost:3001?token=${token}`;
+        ? `${FRONTEND_URL}/app/dashboard/default?token=${token}`
+        : `${FRONTEND_URL}token=${token}`;
       return res.json({
         message: "Google Login successful",
         redirect: redirectUrl,
@@ -215,11 +216,11 @@ class AuthApiController {
 
   static logout(req: any, res: Response) {
     // Xóa cookie phải khai báo y hệt lúc tạo mới xóa được
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'none' : 'lax',
-        });
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
     res.status(200).json({ message: "Logout successful" });
   }
 }

@@ -19,7 +19,7 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 5000;
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"], // Cho phép cả manager và client
+  origin: ["http://localhost:3000", "http://localhost:3001", "https://dgd-store-manager.vercel.app"], // Cho phép cả manager và client
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
