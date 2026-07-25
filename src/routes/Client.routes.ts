@@ -10,6 +10,8 @@ import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 // import { isAuthenticated } from "@middlewares/checkAuth";
 import { verifyToken } from "@middlewares/verifyToken";
+import UserController from "@controllers/clientController/user.controller";
+import ClientOrderApiController from "@controllers/clientController/order.controller";
 const axios = require("axios");
 const app: Express = express();
 const routerClient = express.Router();
@@ -112,4 +114,20 @@ routerClient.delete("/cart/remove/:id", (req, res) => {
 routerClient.post("/order/Checkout", (req, res) => {
   OrderController.createOrder(req, res);
 });
+// Backend: API lấy thông tin user hiện tại
+routerClient.get("/auth/profile", verifyToken, (req, res) => {
+  UserController.getProfile(req, res);
+});
+routerClient.get("/order/mine", (req, res) => {
+  OrderController.getMyOrders(req, res);  
+});
+routerClient.post('/order/push-ghn/:orderId', (req: Request, res: Response) => {
+    ClientOrderApiController.pushToGHN(req, res);
+});
+routerClient.post('/order/sync/:orderId', (req: Request, res: Response) => {
+    ClientOrderApiController.syncStatus(req, res);
+});
+routerClient.post('/order/shipping-fee',(req: Request, res: Response) =>{
+   OrderController.calculateShipping(req,res)
+  });
 export default routerClient;

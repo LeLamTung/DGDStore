@@ -32,7 +32,7 @@ class ProductService {
       
       product.ProductName = data.ProductName;
       product.Stock = Number(data.Stock) || 0;
-      
+      product.Weight = Number(data.Weight) || 0;
       // --- LOGIC TÍNH GIÁ MỚI ---
       const priceOriginal = Number(data.OriginalPrice) || 0;
       let finalSalePrice = 0;
@@ -68,10 +68,11 @@ class ProductService {
       product.SalePercentage = parseFloat(finalPercent.toFixed(2)); 
       product.SalePrice = finalSalePrice;
       // -------------------------------
-
+      console.log("is",data.IsSales)
       product.Description = data.Description || "Chưa có mô tả";
-      product.IsSales = String(data.IsSales) === "true";
-      product.IsHome = String(data.IsHome) === "true";
+      product.IsSales = data.IsSales ;
+      console.log("is",product.IsSales)
+      product.IsHome = data.IsHome ;
       product.Category = data.categoryIdCategory;
 
       // 1. XỬ LÝ ẢNH ĐẠI DIỆN (ImageName) TRƯỚC KHI LƯU
@@ -139,6 +140,7 @@ class ProductService {
     // 1. UPDATE THÔNG TIN CƠ BẢN
     if (data.ProductName) product.ProductName = data.ProductName;
     if (data.Stock) product.Stock = Number(data.Stock);
+    if (data.Weight) product.Weight = Number(data.Weight);
     if (data.Description) product.Description = data.Description;
     
     if (data.IsHome !== undefined) product.IsHome = String(data.IsHome) === "true";

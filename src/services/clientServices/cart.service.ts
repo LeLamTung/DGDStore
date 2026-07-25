@@ -11,8 +11,8 @@ const cartRepo = AppDataSource.getRepository(Cart);
 
 class CartService {
   /** 🛒 Thêm sản phẩm vào giỏ hàng */
-  static async addToCart(userId: number, productId: number, quantity: any) {
-    const parsedQuantity = Number(quantity);
+  static async addToCart(userId: number, productId: number, Quantity: any) {
+    const parsedQuantity = Number(Quantity);
 
     if (!productId || isNaN(parsedQuantity) || parsedQuantity <= 0) {
       throw new Error("Invalid productId or quantity");
@@ -37,18 +37,18 @@ class CartService {
     });
 
     if (cartItem) {
-      const newQty = (cartItem.quantity || 0) + parsedQuantity;
+      const newQty = (cartItem.Quantity || 0) + parsedQuantity;
       if (newQty > (product.Stock || 0)) {
         throw new Error(`Không đủ tồn kho. Hiện tại chỉ còn ${product.Stock}`);
       }
-      cartItem.quantity = newQty;
+      cartItem.Quantity = newQty;
       cartItem.TotalPrice = (product.SalePrice || 0) * newQty;
     } else {
       if (parsedQuantity > (product.Stock || 0)) {
         throw new Error(`Không đủ tồn kho. Hiện tại chỉ còn ${product.Stock}`);
       }
       cartItem = cartRepo.create({
-        quantity: parsedQuantity,
+        Quantity: parsedQuantity,
         TotalPrice: (product.SalePrice || 0) * parsedQuantity,
         Products: product,
         User: user,
@@ -59,7 +59,7 @@ class CartService {
     return await this.getCart(userId); // Gọi lại hàm getCart với userId
   }
 
-  /** 📋 Lấy danh sách giỏ hàng của người dùng */
+  /**  Lấy danh sách giỏ hàng của người dùng */
   static async getCart(userId: number) {
     const cartItems = await cartRepo.find({
       where: { User: { idUser: Number(userId) } },
@@ -74,16 +74,17 @@ class CartService {
       ImageName: item.Products?.ImageName,
       CategoryName: item.Products?.Category?.CategoryName,
       SalePrice: item.Products?.SalePrice,
-      quantity: item.quantity,
+      Quantity: item.Quantity,
+      Weight: item.Products?.Weight,
       TotalPrice: item.TotalPrice,
     }));
   }
 
   /**  Cập nhật số lượng sản phẩm trong giỏ hàng */
-  static async updateProductQuantity(userId: number, productId: number, quantity: number) {
+static async updateProductQuantity(userId: number, productId: number, Quantity: number) {
     if (!userId) throw new Error("User not authenticated");
 
-    const parsedQuantity = Number(quantity);
+    const parsedQuantity = Number(Quantity);
     if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
       throw new Error("Số lượng phải lớn hơn 0");
     }
@@ -106,7 +107,7 @@ class CartService {
       throw error;
     }
 
-    item.quantity = parsedQuantity;
+    item.Quantity = parsedQuantity;
     item.TotalPrice = (item.Products?.SalePrice || 0) * parsedQuantity;
 
     await cartRepo.save(item);

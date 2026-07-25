@@ -31,7 +31,7 @@ class OrderService {
         order.Notes = data.Notes || order.Notes;
         order.TotalPrice = data.TotalPrice || order.TotalPrice;
         order.PaymentMethod = data.PaymentMethod || order.PaymentMethod;
-        order.Status = data.Status || order.Status;
+        order.PaymentStatus = data.PaymentStatus || order.PaymentStatus;
         
         return await OrderRepository.save(order);
     }

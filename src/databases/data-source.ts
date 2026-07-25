@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import "dotenv/config";
+import fs from "fs";
 // Kiểm tra xem có đang ở môi trường Production (Render) không
 const isProduction = process.env.NODE_ENV === 'production';
 export const AppDataSource = new DataSource({
@@ -11,7 +12,16 @@ export const AppDataSource = new DataSource({
   database: process.env.DATABASE_NAME,
   //Cấu hình SSL (Chỉ bật khi lên Render/Postgres)
     // MySQL ở local bật cái này lên thường sẽ bị lỗi kết nối
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  ...(isProduction ? {
+    ssl: {
+      // Đọc file từ thư mục bí mật của Render thay vì thư mục project
+      ca: fs.readFileSync('/etc/secrets/ca.pem').toString(), 
+      rejectUnauthorized: true, 
+    },
+    extra: {
+      connectionLimit: 10, 
+    }
+  } : {}),
   synchronize: false,
   dropSchema: false,
   logging: [ "error"],

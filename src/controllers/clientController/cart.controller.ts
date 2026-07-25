@@ -12,9 +12,9 @@ class CartController {
   static async AddtoCart(req: Request, res: Response) {
     try {
       const userId = CartController.getUserId(req);
-      const { productId, quantity } = req.body;
+      const { productId, Quantity } = req.body;
 
-      const cart = await CartService.addToCart(userId, productId, quantity);
+      const cart = await CartService.addToCart(userId, productId, Quantity);
       
       return res.status(200).json({
         message: "Product added to cart",
@@ -44,13 +44,13 @@ class CartController {
   static async updateProductQuantity(req: Request, res: Response) {
     try {
         const userId = CartController.getUserId(req);
-        const { productId, quantity } = req.body;
+        const { productId, Quantity } = req.body;
 
-        if (!productId || !quantity) {
+        if (!productId || !Quantity) {
              return res.status(400).json({ message: "Thiếu productId hoặc quantity" });
         }
 
-        const cart = await CartService.updateProductQuantity(userId, productId, quantity);
+        const cart = await CartService.updateProductQuantity(userId, productId, Quantity);
         return res.status(200).json({
             message: "Cập nhật thành công",
             data: cart,

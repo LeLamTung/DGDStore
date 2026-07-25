@@ -18,6 +18,9 @@ class Products {
 
     @Column({ name: "stock" })
     Stock?: number
+    
+    @Column("decimal", { precision: 15, scale: 2, name: "weight" })
+    Weight?: number
 
     @Column({ name: "originalprice" })
     OriginalPrice?: number

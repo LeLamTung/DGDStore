@@ -6,6 +6,7 @@ import UserApiController from "@controllers/api/user.api.controller";
 import ProductsApiController from "@controllers/api/product.api.controller";
 import AuthApiController from "@controllers/api/auth.api.controller";
 import OrderApiController from "@controllers/api/order.api.controller";
+import ClientOrderApiController from "@controllers/clientController/order.controller";
 import upload from "@middlewares/upload.middleware";
 import { verifyToken } from "@middlewares/verifyToken";
 import { isAdmin } from "@middlewares/isAdmin";

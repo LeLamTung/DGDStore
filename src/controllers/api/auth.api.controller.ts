@@ -146,7 +146,7 @@ class AuthApiController {
       });
       const redirectUrl = user.Role?.NameRole === "Admin"
         ? `${FRONTEND_URL}/app/dashboard/default?token=${token}`
-        : `${CLIENT_FRONTEND_URL}token=${token}`;
+        : `${CLIENT_FRONTEND_URL}/?token=${token}`;
 
       return res.json({
         message: "Login successful",
@@ -197,7 +197,7 @@ class AuthApiController {
       // SỬA: Thêm redirect URL và AccessToken vào response
       const redirectUrl = user.Role?.NameRole === "Admin"
         ? `${FRONTEND_URL}/app/dashboard/default?token=${token}`
-        : `${CLIENT_FRONTEND_URL}token=${token}`;
+        : `${CLIENT_FRONTEND_URL}/?token=${token}`;
       return res.json({
         message: "Google Login successful",
         redirect: redirectUrl,

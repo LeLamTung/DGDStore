@@ -8,7 +8,7 @@ class Cart {
     idCart?: number
 
     @Column({ name: "quantity" })
-    quantity?: number
+    Quantity?: number
 
     @Column({ name: "totalprice" })
     TotalPrice?: number
